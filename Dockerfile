@@ -1,17 +1,21 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11.6-slim-buster
+# Use official Python 3.11 image
+FROM python:3.11-slim
 
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Copy requirements
+COPY requirements.txt .
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Upgrade pip and install dependencies
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-# Make port 8000 available to the world outside this container
-EXPOSE 8000
+# Copy all code
+COPY . .
 
-# Run the FastAPI application using Uvicorn
-CMD ["uvicorn", "my_api:app", "--host", "0.0.0.0", "--port", "8000"]
+# Expose port
+EXPOSE 10000
+
+# Start API
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "my_api:app", "--bind", "0.0.0.0:10000"]
